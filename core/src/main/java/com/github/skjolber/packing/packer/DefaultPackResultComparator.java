@@ -7,7 +7,7 @@ public class DefaultPackResultComparator implements PackResultComparator {
 	
 	@Override
 	public int compare(PackResult o1, PackResult o2) {
-		
+        // 负载量-越多越好
 		// load volume - more is better
 		if(o1.getLoadVolume() > o2.getLoadVolume()) {
 			return ARGUMENT_1_IS_BETTER;
