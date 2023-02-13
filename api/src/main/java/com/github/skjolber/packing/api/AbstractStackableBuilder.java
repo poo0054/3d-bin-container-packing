@@ -57,7 +57,7 @@ public abstract class AbstractStackableBuilder<B extends AbstractStackableBuilde
 		
 		 // dx, dy, dz
 		
-		if(dx == dy && dx == dz) { // square 3d
+         if (dx == dy && dx == dz) { // square 3d 方形3d
 			// all sides are equal
 
 			// z          y

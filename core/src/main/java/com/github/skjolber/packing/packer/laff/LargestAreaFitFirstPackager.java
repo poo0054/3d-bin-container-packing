@@ -50,6 +50,7 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
             //
             .filter(s -> constraint == null || constraint.canAccept(s)).collect(Collectors.toList());
 
+        // 关键信息
         ExtremePoints3D<StackPlacement> extremePoints3D = new ExtremePoints3D<>(containerStackValue.getLoadDx(),
             containerStackValue.getLoadDy(), containerStackValue.getLoadDz());
         extremePoints3D.setMinimumAreaAndVolumeLimit(getMinStackableArea(scopedStackables),
