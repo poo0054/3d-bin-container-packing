@@ -659,8 +659,6 @@ public class VisualizationTest {
             Box.newBuilder().withId("3").withSize(12, 6, 20).withWeight(0).withRotate3D().build(), 1));
         StackableItems.add(new StackableItem(
             Box.newBuilder().withId("5").withSize(20, 8, 12).withWeight(0).withRotate3D().build(), 1));
-        // StackableItems.add(
-        // new StackableItem(Box.newBuilder().withId("4").withSize(10, 6, 3).withWeight(0).withRotate3D().build(), 1));
 
         List<Container> packaging = packager.packList(StackableItems, 1000);
         if (null == packaging) {

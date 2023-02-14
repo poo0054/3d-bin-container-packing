@@ -99,22 +99,22 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
                 if (firstBox != null && !firstFilter.filter(firstBox, box)) {
                     continue;
                 }
-                // 试试哪些位置可以摆放 - TODO 可能多个位置都能摆放 但是其中一个能放的更多 无法确定
+                // 试试哪些位置可以摆放 - 使用getVolume找到最大容量的摆放位置
                 for (StackValue stackValue : box.getStackValues()) {
                     // 容器是否能容纳该位置
                     if (!firstPoint.fits3D(stackValue)) {
                         continue;
                     }
-                    // 面积 体积比较 选出最大的
-                    /*  if (firstStackValue != null && !firstStackValuePointComparator.accept(firstBox, firstPoint,
-                      firstStackValue, box, firstPoint, stackValue)) {
-                      continue;
+                    /* // 面积 体积比较 选出最大的
+                    if (firstStackValue != null && !firstStackValuePointComparator.accept(firstBox, firstPoint,
+                        firstStackValue, box, firstPoint, stackValue)) {
+                        continue;
                     }*/
                     // 容器内部容器
                     if (constraint != null && !constraint.supports(stack, box, stackValue, 0, 0, levelOffset)) {
                         continue;
                     }
-                    /*firstIndex = i;
+                    /* firstIndex = i;
                     firstStackValue = stackValue;
                     firstBox = box;*/
                     // 添加当前容器使用哪个才装的多
