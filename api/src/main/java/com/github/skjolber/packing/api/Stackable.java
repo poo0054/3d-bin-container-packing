@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class Stackable implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7946664525922183540L;
 	
 	protected final String id;
 	protected final String description;

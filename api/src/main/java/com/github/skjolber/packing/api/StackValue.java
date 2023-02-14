@@ -12,7 +12,7 @@ import java.util.List;
 
 public abstract class StackValue implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 15527826823173124L;
 	
 	protected final int dx; // width
 	protected final int dy; // depth

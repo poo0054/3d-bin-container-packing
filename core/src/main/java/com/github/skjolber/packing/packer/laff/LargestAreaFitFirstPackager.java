@@ -84,7 +84,7 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
             StackValue firstStackValue = null;
             // 包括 体积 重量
             Stackable firstBox = null;
-
+            Long firstVolume = Long.MIN_VALUE;
             // pick the box with the highest area 挑选面积最高的盒子
             // 优先选择面积最大的盒子 并比较剩余空间最大值是否能装得下
             for (int i = 0; i < scopedStackables.size(); i++) {
@@ -106,19 +106,26 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
                         continue;
                     }
                     // 面积 体积比较 选出最大的
-                    if (firstStackValue != null && !firstStackValuePointComparator.accept(firstBox, firstPoint,
-                        firstStackValue, box, firstPoint, stackValue)) {
-                        continue;
-                    }
+                    /*  if (firstStackValue != null && !firstStackValuePointComparator.accept(firstBox, firstPoint,
+                      firstStackValue, box, firstPoint, stackValue)) {
+                      continue;
+                    }*/
                     // 容器内部容器
                     if (constraint != null && !constraint.supports(stack, box, stackValue, 0, 0, levelOffset)) {
                         continue;
                     }
-                    firstIndex = i;
+                    /*firstIndex = i;
                     firstStackValue = stackValue;
-                    firstBox = box;
-                    // 当前可以进行装箱
-
+                    firstBox = box;*/
+                    // 添加当前容器使用哪个才装的多
+                    long volume = getVolume(containerStackValue, constraint, stack, scopedStackables, extremePoints3D,
+                        configuration, levelOffset, stackValue, box);
+                    if (firstVolume <= volume) {
+                        firstVolume = volume;
+                        firstIndex = i;
+                        firstStackValue = stackValue;
+                        firstBox = box;
+                    }
                 }
             }
 
@@ -246,6 +253,108 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
         return new DefaultPackResult(new DefaultContainer(targetContainer.getId(), targetContainer.getDescription(),
             targetContainer.getVolume(), targetContainer.getEmptyWeight(), stackValues, stack), stack,
             remainingStackables.isEmpty());
+    }
+
+    private long getVolume(ContainerStackValue containerStackValue, StackConstraint constraint, LevelStack stack,
+        List<Stackable> scopedStackables, ExtremePoints3D<StackPlacement> extremePoints3D,
+        LargestAreaFitFirstPackagerConfiguration<Point3D<StackPlacement>> configuration, int levelOffset,
+        StackValue firstStackValue, Stackable firstBox) {
+        // 当前可以进行装箱 需要算出当前和下一次的哪个在这一层的装箱率比较高
+        DefaultContainerStackValue levelStackValue = stack.getContainerStackValue(firstStackValue.getDz());
+        Stack levelStack = new DefaultStack();
+        StackPlacement first = new StackPlacement(firstBox, firstStackValue, 0, 0, 0, -1, -1);
+        levelStack.add(first);
+        // 剩余体重
+        int maxRemainingLevelWeight = levelStackValue.getMaxLoadWeight() - firstBox.getWeight();
+        extremePoints3D.reset(containerStackValue.getLoadDx(), containerStackValue.getLoadDy(),
+            firstStackValue.getDz());
+        extremePoints3D.add(0, first);
+        StackableFilter nextFilter = configuration.getNextStackableFilter();
+        StackValuePointFilter<Point3D<StackPlacement>> nextStackValuePointComparator =
+            configuration.getNextStackValuePointFilter();
+        while (!extremePoints3D.isEmpty() && maxRemainingLevelWeight > 0 && !scopedStackables.isEmpty()) {
+            long maxPointVolume = extremePoints3D.getMaxVolume();
+            long maxPointArea = extremePoints3D.getMaxArea();
+            int bestPointIndex = -1;
+            int bestIndex = -1;
+            StackValue bestStackValue = null;
+            Stackable bestStackable = null;
+            for (int i = 0; i < scopedStackables.size(); i++) {
+                Stackable box = scopedStackables.get(i);
+                if (box.getVolume() > maxPointVolume) {
+                    continue;
+                }
+                if (box.getWeight() > maxRemainingLevelWeight) {
+                    continue;
+                }
+                if (constraint != null && !constraint.accepts(stack, box)) {
+                    continue;
+                }
+
+                if (bestStackValue != null && !nextFilter.filter(bestStackable, box)) {
+                    continue;
+                }
+                for (StackValue stackValue : box.getStackValues()) {
+                    if (stackValue.getArea() > maxPointArea) {
+                        continue;
+                    }
+                    if (firstStackValue.getDz() < stackValue.getDz()) {
+                        continue;
+                    }
+
+                    int currentPointsCount = extremePoints3D.getValueCount();
+                    for (int k = 0; k < currentPointsCount; k++) {
+                        Point3D<StackPlacement> point3d = extremePoints3D.getValue(k);
+
+                        if (!point3d.fits3D(stackValue)) {
+                            continue;
+                        }
+                        if (bestIndex != -1 && !nextStackValuePointComparator.accept(bestStackable,
+                            extremePoints3D.getValue(bestPointIndex), bestStackValue, box, point3d, stackValue)) {
+                            continue;
+                        }
+                        if (constraint != null && !constraint.supports(stack, box, stackValue, point3d.getMinX(),
+                            point3d.getMinY(), levelOffset + point3d.getMinZ())) {
+                            continue;
+                        }
+                        bestPointIndex = k;
+                        bestIndex = i;
+                        bestStackValue = stackValue;
+                        bestStackable = box;
+                    }
+                }
+            }
+
+            if (bestIndex == -1) {
+                break;
+            }
+
+            // 不需要删除
+            Stackable remove = bestStackable;
+
+            Point3D<StackPlacement> point = extremePoints3D.getValue(bestPointIndex);
+
+            StackPlacement stackPlacement =
+                new StackPlacement(remove, bestStackValue, point.getMinX(), point.getMinY(), point.getMinZ(), -1, -1);
+            levelStack.add(stackPlacement);
+            extremePoints3D.add(bestPointIndex, stackPlacement);
+
+            boolean minArea = bestStackValue.getArea() == extremePoints3D.getMinAreaLimit();
+            boolean minVolume = extremePoints3D.getMinVolumeLimit() == bestStackable.getVolume();
+            if (minArea && minVolume) {
+                extremePoints3D.setMinimumAreaAndVolumeLimit(getMinStackableArea(scopedStackables),
+                    getMinStackableVolume(scopedStackables));
+            } else if (minArea) {
+                extremePoints3D.setMinimumAreaLimit(getMinStackableArea(scopedStackables));
+            } else if (minVolume) {
+                extremePoints3D.setMinimumVolumeLimit(getMinStackableVolume(scopedStackables));
+            }
+            maxRemainingLevelWeight -= remove.getWeight();
+        }
+
+        long volume = levelStack.getVolume();
+        System.out.println(volume);
+        return volume;
     }
 
     @Override
