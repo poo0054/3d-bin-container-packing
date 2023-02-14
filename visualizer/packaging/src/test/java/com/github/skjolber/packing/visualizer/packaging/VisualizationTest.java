@@ -623,8 +623,8 @@ public class VisualizationTest {
         final StackableSurface THREE_D =
             new StackableSurface.Builder().withTop().withRight().withBottom().withLeft().withRear().withFront().build();
         List<Container> containers = new ArrayList<>();
-        containers.add(Container.newBuilder().withDescription("a").withEmptyWeight(0).withSize(10, 10, 10)
-            .withMaxLoadWeight(100).build());
+        containers.add(Container.newBuilder().withDescription("a").withEmptyWeight(0)
+            .withSurfaces(StackableSurface.THREE_D.getSides()).withSize(20, 15, 12).withMaxLoadWeight(100).build());
         // containers.add(Container.newBuilder().withDescription("2").withEmptyWeight(0).withSize(20, 20, 20)
         // .withMaxLoadWeight(100).build());
         // containers.add(Container.newBuilder().withDescription("3").withEmptyWeight(0).withSize(30, 30,
@@ -640,22 +640,27 @@ public class VisualizationTest {
             LargestAreaFitFirstPackager.newBuilder().withContainers(containers).build();
 
         List<StackableItem> StackableItems = new ArrayList<>();
+        // StackableItems.add(new StackableItem(
+        // Box.newBuilder().withId("3").withSize(5, 5, 5).withWeight(0).withRotate3D().build(), 1));
+
+        // StackableItems.add(
+        // new StackableItem(Box.newBuilder().withId("1").withSize(5, 7, 9).withWeight(0).withRotate3D().build(), 1));
+        // StackableItems.add(new StackableItem(
+        // Box.newBuilder().withId("2").withSize(2, 10, 10).withWeight(0).withRotate3D().build(), 1));
+        // StackableItems.add(new StackableItem(
+        // Box.newBuilder().withId("3").withSize(2, 10, 10).withWeight(0).withRotate3D().build(), 1));
+        // StackableItems.add(new StackableItem(
+        // Box.newBuilder().withId("4").withSize(5, 3, 1).withWeight(0).withRotate3D().build(), 1));
+        // StackableItems.add(new StackableItem(
+        // Box.newBuilder().withId("1").withSize(10, 10, 2).withWeight(0).withRotate3D().build(), 1));
+        // StackableItems.add(new StackableItem(
+        // Box.newBuilder().withId("2").withSize(10, 10, 2).withWeight(0).withRotate3D().build(), 1));
         StackableItems.add(new StackableItem(
-            Box.newBuilder().withId("1").withSize(5, 10, 10).withWeight(0).withRotate3D().build(), 1));
+            Box.newBuilder().withId("3").withSize(12, 6, 20).withWeight(0).withRotate3D().build(), 1));
         StackableItems.add(new StackableItem(
-            Box.newBuilder().withId("2").withSize(6, 10, 10).withWeight(0).withRotate3D().build(), 1));
-        StackableItems.add(new StackableItem(
-            Box.newBuilder().withId("3").withSize(2, 10, 10).withWeight(0).withRotate3D().build(), 1));
-        // StackableItems.add(new StackableItem(
-        // Box.newBuilder().withId("1").withSize(10, 10, 2).withWeight(0).withStackableSurface(THREE_D).build(), 1));
-        // StackableItems.add(new StackableItem(
-        // Box.newBuilder().withId("2").withSize(10, 10, 2).withWeight(0).withStackableSurface(THREE_D).build(), 1));
-        // StackableItems.add(new StackableItem(
-        // Box.newBuilder().withId("3").withSize(10, 6, 3).withWeight(0).withStackableSurface(THREE_D).build(), 1));
-        // StackableItems.add(new StackableItem(
-        // Box.newBuilder().withId("5").withSize(10, 6, 4).withWeight(0).withStackableSurface(THREE_D).build(), 1));
-        // StackableItems.add(new StackableItem(
-        // Box.newBuilder().withId("4").withSize(10, 6, 3).withWeight(0).withStackableSurface(THREE_D).build(), 1));
+            Box.newBuilder().withId("5").withSize(20, 8, 12).withWeight(0).withRotate3D().build(), 1));
+        // StackableItems.add(
+        // new StackableItem(Box.newBuilder().withId("4").withSize(10, 6, 3).withWeight(0).withRotate3D().build(), 1));
 
         List<Container> packaging = packager.packList(StackableItems, 1000);
         if (null == packaging) {

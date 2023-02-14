@@ -116,8 +116,6 @@ public abstract class Point2D<P extends Placement2D> implements Serializable {
 	protected long volume;
 	
 	public Point2D(int minX, int minY, int maxX, int maxY) {
-		super();
-		
 		/*
 		if(maxX < minX) {
 			throw new IllegalArgumentException("MaxX " + maxX + " is less than minX " + minX);

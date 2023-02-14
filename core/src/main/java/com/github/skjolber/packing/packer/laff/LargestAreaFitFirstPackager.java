@@ -38,6 +38,7 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
 
         ContainerStackValue containerStackValue = stackValues[0];
 
+        // 容器中的内部容器
         StackConstraint constraint = containerStackValue.getConstraint();
 
         LevelStack stack = new LevelStack(containerStackValue);
@@ -47,7 +48,7 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
             // 过滤体积 重量
             .filter(s -> s.getVolume() <= containerStackValue.getMaxLoadVolume()
                 && s.getWeight() <= targetContainer.getMaxLoadWeight())
-            //
+            // 容器内部的容器
             .filter(s -> constraint == null || constraint.canAccept(s)).collect(Collectors.toList());
 
         // 关键信息
@@ -72,16 +73,20 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
                 return null;
             }
 
+            // 容器最大重量
             int maxWeight = stack.getFreeWeightLoad();
 
-            // there is only point, spanning the free space in the level 只有点，跨越关卡中的自由空间
+            // there is only point, spanning the free space in the level
             Point3D<StackPlacement> firstPoint = extremePoints3D.getValue(0);
 
             int firstIndex = -1;
+            // 位置
             StackValue firstStackValue = null;
-            Stackable firstBox = null; // 第一
+            // 包括 体积 重量
+            Stackable firstBox = null;
 
             // pick the box with the highest area 挑选面积最高的盒子
+            // 优先选择面积最大的盒子 并比较剩余空间最大值是否能装得下
             for (int i = 0; i < scopedStackables.size(); i++) {
                 Stackable box = scopedStackables.get(i);
                 if (box.getWeight() > maxWeight) {
@@ -90,24 +95,30 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
                 if (constraint != null && !constraint.accepts(stack, box)) {
                     continue;
                 }
+                // 面积比较
                 if (firstBox != null && !firstFilter.filter(firstBox, box)) {
                     continue;
                 }
+                // 试试哪些位置可以摆放 - TODO 可能多个位置都能摆放 但是其中一个能放的更多 无法确定
                 for (StackValue stackValue : box.getStackValues()) {
+                    // 容器是否能容纳该位置
                     if (!firstPoint.fits3D(stackValue)) {
                         continue;
                     }
+                    // 面积 体积比较 选出最大的
                     if (firstStackValue != null && !firstStackValuePointComparator.accept(firstBox, firstPoint,
                         firstStackValue, box, firstPoint, stackValue)) {
                         continue;
                     }
-
+                    // 容器内部容器
                     if (constraint != null && !constraint.supports(stack, box, stackValue, 0, 0, levelOffset)) {
                         continue;
                     }
                     firstIndex = i;
                     firstStackValue = stackValue;
                     firstBox = box;
+                    // 当前可以进行装箱
+
                 }
             }
 
@@ -124,7 +135,7 @@ public class LargestAreaFitFirstPackager extends AbstractLargestAreaFitFirstPack
             StackPlacement first = new StackPlacement(stackable, firstStackValue, 0, 0, 0, -1, -1);
 
             levelStack.add(first);
-
+            // 剩余体重
             int maxRemainingLevelWeight = levelStackValue.getMaxLoadWeight() - stackable.getWeight();
 
             extremePoints3D.reset(containerStackValue.getLoadDx(), containerStackValue.getLoadDy(),

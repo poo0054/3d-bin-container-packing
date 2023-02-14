@@ -12,7 +12,6 @@ public abstract class Stackable implements Serializable {
 	protected final String description;
 	
 	public Stackable(String id, String description) {
-		super();
 		this.id = id;
 		this.description = description;
 	}

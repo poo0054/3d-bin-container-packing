@@ -146,6 +146,7 @@ public class ExtremePoints3D<P extends Placement3D & Serializable> implements Ex
         // 从现有点复制maxX和maxY: a & b用于确定yy处的maxX b & c用于确定xx处的maxY根据先前的排序 (在x方向上) 确定开始和结束索引
         //
 
+        // 二分查找 找到 最接近x的下标
         int endIndex = binarySearchPlusMinX(placement.getAbsoluteEndX());
 
         moveToXX.ensureCapacity(endIndex);
@@ -1406,8 +1407,8 @@ public class ExtremePoints3D<P extends Placement3D & Serializable> implements Ex
 
     public void redo() {
         values.clear();
-        placements.clear();
 
+        placements.clear();
         addFirstPoint();
     }
 
@@ -1463,7 +1464,7 @@ public class ExtremePoints3D<P extends Placement3D & Serializable> implements Ex
     }
 
     public int binarySearchPlusMinX(int key) {
-        // return exclusive result
+        // return exclusive result 返回独占结果
 
         int low = 0;
         int high = values.size() - 1;
